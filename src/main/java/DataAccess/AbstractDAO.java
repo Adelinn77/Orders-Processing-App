@@ -35,6 +35,30 @@ public class AbstractDAO<T> {
         return sb.toString();
     }
 
+    private String createSelectAllQuery() {
+        StringBuilder sb = new StringBuilder();
+        sb.append("SELECT ");
+        sb.append("* ");
+        sb.append("FROM ");
+        sb.append(type.getSimpleName());
+        return sb.toString();
+    }
+
+    private String createInsertQuery(StringBuilder columns, StringBuilder values) {
+        String query = "INSERT INTO " + type.getSimpleName() + " (" + columns + ") VALUES (" + values + ")";
+        return query;
+    }
+
+    private String createUpdateQuery(StringBuilder setClause) {
+        String query = "UPDATE " + type.getSimpleName() + " SET " + setClause + " WHERE id=?";
+        return query;
+    }
+
+    private String createDeleteQuery() {
+        String query ="DELETE FROM " + type.getSimpleName() + " WHERE id=?";
+        return query;
+    }
+
     public T findById(int id) {
         Connection connection = null;
         PreparedStatement statement = null;
@@ -58,6 +82,133 @@ public class AbstractDAO<T> {
 
         return null;
     }
+
+    public List<T> findAll() {
+        Connection connection = null;
+        PreparedStatement statement = null;
+        ResultSet resultSet = null;
+        String query = createSelectAllQuery();
+        List<T> list = new ArrayList<>();
+        try {
+            connection = ConnectionFactory.getConnection();
+            statement = connection.prepareStatement(query);
+            resultSet = statement.executeQuery();
+
+            return createObjects(resultSet);
+        } catch (SQLException e) {
+            LOGGER.log(Level.WARNING, type.getName() + " DAO:findAll " + e.getMessage());
+        } finally {
+            ConnectionFactory.close(resultSet);
+            ConnectionFactory.close(statement);
+            ConnectionFactory.close(connection);
+        }
+
+        return null;
+    }
+
+    public void insert(T t) {
+        Connection connection = null;
+        PreparedStatement statement = null;
+        try {
+            connection = ConnectionFactory.getConnection();
+            Field[] fields = type.getDeclaredFields();
+
+            StringBuilder columns = new StringBuilder();
+            StringBuilder values = new StringBuilder();
+            List<Object> fieldValues = new ArrayList<>();
+
+            for (Field field : fields) {
+                field.setAccessible(true);
+                if (!field.getName().equalsIgnoreCase("id")) {
+                    columns.append(field.getName()).append(",");
+                    values.append("?,");
+                    fieldValues.add(field.get(t));
+                }
+            }
+
+            columns.setLength(columns.length() - 1);
+            values.setLength(values.length() - 1);
+
+            String query = createInsertQuery(columns, values);
+            statement = connection.prepareStatement(query);
+
+            for (int i = 0; i < fieldValues.size(); i++) {
+                statement.setObject(i + 1, fieldValues.get(i));
+            }
+            statement.executeUpdate();
+        } catch (Exception e) {
+            LOGGER.log(Level.WARNING, type.getName() + " DAO:insert " + e.getMessage());
+        } finally {
+            ConnectionFactory.close(statement);
+            ConnectionFactory.close(connection);
+        }
+    }
+
+    public void update(T t) {
+        Connection connection = null;
+        PreparedStatement statement = null;
+        try {
+            connection = ConnectionFactory.getConnection();
+            Field[] fields = type.getDeclaredFields();
+
+            StringBuilder setClause = new StringBuilder();
+            List<Object> fieldValues = new ArrayList<>();
+            Object idValue = null;
+
+            for (Field field : fields) {
+                field.setAccessible(true);
+                if (!field.getName().equalsIgnoreCase("id")) {
+                    setClause.append(field.getName()).append("=?, ");
+                    fieldValues.add(field.get(t));
+                } else {
+                    idValue = field.get(t);
+                }
+            }
+
+            setClause.setLength(setClause.length() - 2);
+
+            String query = createUpdateQuery(setClause);
+            statement = connection.prepareStatement(query);
+
+            for (int i = 0; i < fieldValues.size(); i++) {
+                statement.setObject(i + 1, fieldValues.get(i));
+            }
+            statement.setObject(fieldValues.size() + 1, idValue);
+
+            statement.executeUpdate();
+        } catch (Exception e) {
+            LOGGER.log(Level.WARNING, type.getName() + " DAO:update " + e.getMessage());
+        } finally {
+            ConnectionFactory.close(statement);
+            ConnectionFactory.close(connection);
+        }
+    }
+
+
+    public void delete(T t) {
+        Connection connection = null;
+        PreparedStatement statement = null;
+        try {
+            connection = ConnectionFactory.getConnection();
+
+            Field idField = type.getDeclaredField("id");
+            idField.setAccessible(true);
+            Object idValue = idField.get(t);
+
+            String query = createDeleteQuery();
+            statement = connection.prepareStatement(query);
+            statement.setObject(1, idValue);
+
+            statement.executeUpdate();
+        } catch (Exception e) {
+            LOGGER.log(Level.WARNING, type.getName() + " DAO:delete " + e.getMessage());
+        } finally {
+            ConnectionFactory.close(statement);
+            ConnectionFactory.close(connection);
+        }
+    }
+
+
 
     private List<T> createObjects(ResultSet resultSet) {
         List<T> list = new ArrayList<>();
