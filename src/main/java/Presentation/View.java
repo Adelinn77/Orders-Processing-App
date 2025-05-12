@@ -10,7 +10,7 @@ import java.sql.Connection;
 
 public class View extends JFrame {
     private JPanel contentPane;
-    private Image background = new ImageIcon(getClass().getResource("/w1.avif")).getImage();
+    private Image background = new ImageIcon(getClass().getResource("/8.jpg")).getImage();
     private JMenuBar menuBar = new JMenuBar();
     private JButton clientsButton = new JButton("CLIENTS");
     private JButton productsButton = new JButton("PRODUCTS");
