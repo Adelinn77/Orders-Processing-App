@@ -4,22 +4,22 @@ public class Product {
     private int id;
     private String name;
     private float price;
-    private int currentStock;
+    private int stock;
 
-    public Product(String name, int price, int currentStock) {
+    public Product(String name, int price, int stock) {
         this.name = name;
         this.price = price;
-        this.currentStock = currentStock;
+        this.stock = stock;
     }
 
     public Product() {}
 
-    public int getCurrentStock() {
-        return currentStock;
+    public int getStock() {
+        return stock;
     }
 
-    public void setCurrentStock(int currentStock) {
-        this.currentStock = currentStock;
+    public void setStock(int stock) {
+        this.stock = stock;
     }
 
     public int getId() {

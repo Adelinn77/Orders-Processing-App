@@ -6,13 +6,18 @@ import BusinessLogic.OrderBLL;
 import DataAccess.ClientDAO;
 import DataAccess.ConnectionFactory;
 import Model.Client;
+import com.mysql.cj.xdevapi.Column;
 
 import javax.swing.*;
+import javax.swing.table.DefaultTableCellRenderer;
+import javax.swing.table.JTableHeader;
+import javax.swing.table.TableColumn;
 import java.awt.*;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 import java.sql.Connection;
 import java.util.ArrayList;
+import java.util.Enumeration;
 
 public class View extends JFrame {
     private JPanel contentPane;
@@ -24,6 +29,9 @@ public class View extends JFrame {
     private JButton clientsButton = new JButton("CLIENTS");
     private JButton productsButton = new JButton("PRODUCTS");
     private JButton ordersButton = new JButton("ORDERS");
+    private JButton createOrder = new JButton("+");
+    private JButton addClient = new JButton("Add Client");
+    private JButton addProduct = new JButton("Add Product");
 
     public View(String name) {
         super(name);
@@ -93,6 +101,7 @@ public class View extends JFrame {
 
     public void displayClientsTable() {
         JTable clientsTable = ClientBLL.getClientsTable();
+        customizeTable(clientsTable);
         JScrollPane scrollPane = new JScrollPane(clientsTable);
         clientsPanel.add(scrollPane);
         clearContentPane();
@@ -101,6 +110,7 @@ public class View extends JFrame {
 
     public void displayProductsTable() {
         JTable productsTable = ProductBLL.getProductsTable();
+        customizeTable(productsTable);
         JScrollPane scrollPane = new JScrollPane(productsTable);
         productsPanel.add(scrollPane);
         clearContentPane();
@@ -109,6 +119,7 @@ public class View extends JFrame {
 
     public void displayOrdersTable() {
         JTable ordersTable = OrderBLL.getOrdersTable();
+        customizeTable(ordersTable);
         JScrollPane scrollPane = new JScrollPane(ordersTable);
         ordersPanel.add(scrollPane);
         clearContentPane();
@@ -118,6 +129,36 @@ public class View extends JFrame {
     public void clearContentPane() {
         contentPane.removeAll();
         contentPane.add(menuBar, BorderLayout.NORTH);
+    }
+
+    public void customizeTable(JTable table) {
+        DefaultTableCellRenderer centerRenderer = new DefaultTableCellRenderer();
+        centerRenderer.setHorizontalAlignment(DefaultTableCellRenderer.CENTER);
+        centerRenderer.setVerticalAlignment(DefaultTableCellRenderer.CENTER);
+
+        Enumeration<TableColumn> columns = table.getColumnModel().getColumns();
+        while (columns.hasMoreElements()) {
+            TableColumn column = columns.nextElement();
+            column.setCellRenderer(centerRenderer);
+            column.setPreferredWidth(100);
+        }
+
+        table.setBackground(new Color(240, 245, 255));
+        table.setForeground(new Color(0, 51, 102));
+        table.setGridColor(new Color(192, 199, 217));
+        table.setSelectionBackground(new Color(255, 140, 0));
+        table.setSelectionForeground(new Color(255, 255, 255));
+        table.setFont(new Font("Dialog", Font.PLAIN, 20));
+        table.setRowHeight(25);
+
+        JTableHeader header = table.getTableHeader();
+        Font currentFont = header.getFont();
+        Font newFont = currentFont.deriveFont(20f);
+        header.setBackground( new Color(0, 89, 179));
+        header.setForeground(new Color(255, 255, 255));
+        header.setFont(newFont);
+
+
     }
 
     public JPanel createRow(JTextField textField, JLabel label){
