@@ -1,5 +1,6 @@
 package DataAccess;
 
+import javax.swing.*;
 import java.beans.IntrospectionException;
 import java.beans.PropertyDescriptor;
 import java.lang.reflect.Field;
@@ -83,12 +84,12 @@ public class AbstractDAO<T> {
         return null;
     }
 
-    public List<T> findAll() {
+    public ArrayList<T> findAll() {
         Connection connection = null;
         PreparedStatement statement = null;
         ResultSet resultSet = null;
         String query = createSelectAllQuery();
-        List<T> list = new ArrayList<>();
+        ArrayList<T> list = new ArrayList<>();
         try {
             connection = ConnectionFactory.getConnection();
             statement = connection.prepareStatement(query);
@@ -210,8 +211,8 @@ public class AbstractDAO<T> {
 
 
 
-    private List<T> createObjects(ResultSet resultSet) {
-        List<T> list = new ArrayList<>();
+    private ArrayList<T> createObjects(ResultSet resultSet) {
+        ArrayList<T> list = new ArrayList<>();
 
         try {
             while (resultSet.next()) {
@@ -234,6 +235,29 @@ public class AbstractDAO<T> {
         }
 
         return list;
+    }
+
+    public static <T> JTable buildTableFromList(List<T> list) {
+        if (list == null || list.isEmpty()) return new JTable();
+
+        T objList = list.get(0);
+        Field[] fields = objList.getClass().getDeclaredFields();
+        String[] columnNames = Arrays.stream(fields).map(Field::getName).toArray(String[]::new);
+
+        Object[][] data = new Object[list.size()][fields.length];
+        for (int i = 0; i < list.size(); i++) {
+            T obj = list.get(i);
+            for (int j = 0; j < fields.length; j++) {
+                fields[j].setAccessible(true);
+                try {
+                    data[i][j] = fields[j].get(obj);
+                } catch (IllegalAccessException e) {
+                    e.printStackTrace();
+                }
+            }
+        }
+
+        return new JTable(data, columnNames);
     }
 
 

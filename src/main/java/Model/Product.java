@@ -3,7 +3,7 @@ package Model;
 public class Product {
     private int id;
     private String name;
-    private int price;
+    private float price;
     private int currentStock;
 
     public Product(String name, int price, int currentStock) {
@@ -38,11 +38,11 @@ public class Product {
         this.name = name;
     }
 
-    public int getPrice() {
+    public float getPrice() {
         return price;
     }
 
-    public void setPrice(int price) {
+    public void setPrice(float price) {
         this.price = price;
     }
 }

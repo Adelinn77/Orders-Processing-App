@@ -6,14 +6,14 @@ public class Client {
     private int age;
     private String email;
     private String address;
-    private String phoneNumber;
+    private String phone;
 
-    public Client(String name, int age, String email, String address, String phoneNumber) {
+    public Client(String name, int age, String email, String address, String phone) {
         this.name = name;
         this.age = age;
         this.email = email;
         this.address = address;
-        this.phoneNumber = phoneNumber;
+        this.phone = phone;
     }
 
     public Client() {}
@@ -58,6 +58,14 @@ public class Client {
         this.name = name;
     }
 
+    public String getPhone() {
+        return phone;
+    }
+
+    public void setPhone(String phone) {
+        this.phone = phone;
+    }
+
     @Override
     public String toString() {
         return "Client{" +
@@ -66,7 +74,7 @@ public class Client {
                 ", name='" + name + '\'' +
                 ", age=" + age +
                 ", email='" + email + '\'' +
-                ", phoneNumber='" + phoneNumber + '\'' +
+                ", phone='" + phone + '\'' +
                 '}';
     }
 }

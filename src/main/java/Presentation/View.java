@@ -1,15 +1,24 @@
 package Presentation;
 
+import BusinessLogic.ClientBLL;
+import BusinessLogic.ProductBLL;
+import BusinessLogic.OrderBLL;
+import DataAccess.ClientDAO;
 import DataAccess.ConnectionFactory;
+import Model.Client;
 
 import javax.swing.*;
 import java.awt.*;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 import java.sql.Connection;
+import java.util.ArrayList;
 
 public class View extends JFrame {
     private JPanel contentPane;
+    private JPanel clientsPanel = new JPanel(new BorderLayout());
+    private JPanel productsPanel = new JPanel(new BorderLayout());
+    private JPanel ordersPanel = new JPanel(new BorderLayout());
     private Image background = new ImageIcon(getClass().getResource("/8.jpg")).getImage();
     private JMenuBar menuBar = new JMenuBar();
     private JButton clientsButton = new JButton("CLIENTS");
@@ -18,25 +27,51 @@ public class View extends JFrame {
 
     public View(String name) {
         super(name);
-        this.setSize(800, 600);
-        setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
         this.setVisible(true);
+        this.setSize(1300, 800);
+        setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
         this.prepareGUI();
     }
 
     public void prepareGUI() {
         contentPane = new BackgroundPanel(background);
         contentPane.setLayout(new BorderLayout());
+
         customizeMenuBar(menuBar);
         customizeMenuButtons(clientsButton);
         customizeMenuButtons(productsButton);
         customizeMenuButtons(ordersButton);
+
+        this.setActionListeners();
+
         menuBar.add(clientsButton);
         menuBar.add(productsButton);
         menuBar.add(ordersButton);
         menuBar.add(Box.createHorizontalGlue());
+
+
         contentPane.add(menuBar, BorderLayout.NORTH);
         this.setContentPane(contentPane);
+    }
+
+    public void setActionListeners() {
+        clientsButton.addActionListener(e -> {
+            displayClientsTable();
+            contentPane.revalidate();
+            contentPane.repaint();
+        });
+
+        productsButton.addActionListener(e -> {
+            displayProductsTable();
+            contentPane.revalidate();
+            contentPane.repaint();
+        });
+
+        ordersButton.addActionListener(e -> {
+            displayOrdersTable();
+            contentPane.revalidate();
+            contentPane.repaint();
+        });
     }
 
     public void customizeMenuBar(JMenuBar menuBar) {
@@ -54,13 +89,35 @@ public class View extends JFrame {
                 BorderFactory.createMatteBorder(3, 3, 3, 3, Color.DARK_GRAY),
                 BorderFactory.createEmptyBorder(5, 15, 5, 15)
         ));
-        button.addActionListener(new ActionListener() {
-            @Override
-            public void actionPerformed(ActionEvent e) {
+    }
 
-            }
-        });
+    public void displayClientsTable() {
+        JTable clientsTable = ClientBLL.getClientsTable();
+        JScrollPane scrollPane = new JScrollPane(clientsTable);
+        clientsPanel.add(scrollPane);
+        clearContentPane();
+        contentPane.add(clientsPanel, BorderLayout.CENTER);
+    }
 
+    public void displayProductsTable() {
+        JTable productsTable = ProductBLL.getProductsTable();
+        JScrollPane scrollPane = new JScrollPane(productsTable);
+        productsPanel.add(scrollPane);
+        clearContentPane();
+        contentPane.add(productsPanel, BorderLayout.CENTER);
+    }
+
+    public void displayOrdersTable() {
+        JTable ordersTable = OrderBLL.getOrdersTable();
+        JScrollPane scrollPane = new JScrollPane(ordersTable);
+        ordersPanel.add(scrollPane);
+        clearContentPane();
+        contentPane.add(ordersPanel, BorderLayout.CENTER);
+    }
+
+    public void clearContentPane() {
+        contentPane.removeAll();
+        contentPane.add(menuBar, BorderLayout.NORTH);
     }
 
     public JPanel createRow(JTextField textField, JLabel label){
