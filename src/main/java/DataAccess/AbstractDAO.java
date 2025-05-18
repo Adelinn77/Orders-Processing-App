@@ -256,7 +256,6 @@ public class AbstractDAO<T> {
                 }
             }
         }
-
         return new JTable(data, columnNames);
     }
 

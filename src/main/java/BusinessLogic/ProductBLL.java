@@ -16,4 +16,8 @@ public class ProductBLL {
         products = productDAO.findAll();
         return ProductDAO.buildTableFromList(products);
     }
+
+    public static void addProduct(Product product) {
+        productDAO.insert(product);
+    }
 }

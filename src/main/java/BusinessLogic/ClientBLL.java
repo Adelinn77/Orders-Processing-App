@@ -16,4 +16,8 @@ public class ClientBLL {
         clients = clientDAO.findAll();
         return ClientDAO.buildTableFromList(clients);
     }
+
+    public static void addClient(Client client) {
+        clientDAO.insert(client);
+    }
 }

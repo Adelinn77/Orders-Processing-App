@@ -6,6 +6,7 @@ import BusinessLogic.OrderBLL;
 import DataAccess.ClientDAO;
 import DataAccess.ConnectionFactory;
 import Model.Client;
+import Model.Product;
 import com.mysql.cj.xdevapi.Column;
 
 import javax.swing.*;
@@ -29,7 +30,7 @@ public class View extends JFrame {
     private JButton clientsButton = new JButton("CLIENTS");
     private JButton productsButton = new JButton("PRODUCTS");
     private JButton ordersButton = new JButton("ORDERS");
-    private JButton createOrder = new JButton("+");
+    private JButton createOrder = new JButton("Create Order");
     private JButton addClient = new JButton("Add Client");
     private JButton addProduct = new JButton("Add Product");
 
@@ -49,6 +50,10 @@ public class View extends JFrame {
         customizeMenuButtons(clientsButton);
         customizeMenuButtons(productsButton);
         customizeMenuButtons(ordersButton);
+
+        customizeAddButtons(createOrder);
+        customizeAddButtons(addClient);
+        customizeAddButtons(addProduct);
 
         this.setActionListeners();
 
@@ -80,6 +85,14 @@ public class View extends JFrame {
             contentPane.revalidate();
             contentPane.repaint();
         });
+
+        addClient.addActionListener(e -> {
+            displayAddClientDialog();
+        });
+
+        addProduct.addActionListener(e -> {
+            displayAddProductDialog();
+        });
     }
 
     public void customizeMenuBar(JMenuBar menuBar) {
@@ -99,11 +112,19 @@ public class View extends JFrame {
         ));
     }
 
+    public void customizeAddButtons(JButton button) {
+        button.setFont(new Font("Helvetica", Font.BOLD, 20));
+        button.setPreferredSize(new Dimension(40, 30));
+        button.setBackground(new Color(255, 140, 0));
+        button.setForeground(Color.DARK_GRAY);
+    }
+
     public void displayClientsTable() {
         JTable clientsTable = ClientBLL.getClientsTable();
         customizeTable(clientsTable);
         JScrollPane scrollPane = new JScrollPane(clientsTable);
-        clientsPanel.add(scrollPane);
+        clientsPanel.add(addClient, BorderLayout.NORTH);
+        clientsPanel.add(scrollPane, BorderLayout.CENTER);
         clearContentPane();
         contentPane.add(clientsPanel, BorderLayout.CENTER);
     }
@@ -112,7 +133,8 @@ public class View extends JFrame {
         JTable productsTable = ProductBLL.getProductsTable();
         customizeTable(productsTable);
         JScrollPane scrollPane = new JScrollPane(productsTable);
-        productsPanel.add(scrollPane);
+        productsPanel.add(addProduct, BorderLayout.NORTH);
+        productsPanel.add(scrollPane, BorderLayout.CENTER);
         clearContentPane();
         contentPane.add(productsPanel, BorderLayout.CENTER);
     }
@@ -121,10 +143,102 @@ public class View extends JFrame {
         JTable ordersTable = OrderBLL.getOrdersTable();
         customizeTable(ordersTable);
         JScrollPane scrollPane = new JScrollPane(ordersTable);
-        ordersPanel.add(scrollPane);
+        ordersPanel.add(createOrder, BorderLayout.NORTH);
+        ordersPanel.add(scrollPane, BorderLayout.CENTER);
         clearContentPane();
         contentPane.add(ordersPanel, BorderLayout.CENTER);
     }
+
+    public void displayAddClientDialog() {
+        JDialog dialog = new JDialog(this, "Add new client", true);
+        dialog.setSize(400, 300);
+        dialog.setLayout(new GridLayout(8, 1));
+        dialog.setLocationRelativeTo(this);
+
+        JLabel nameLabel = new JLabel("Name:");
+        JLabel ageLabel = new JLabel("Age:");
+        JLabel emailLabel = new JLabel("Email:");
+        JLabel addressLabel = new JLabel("Address:");
+        JLabel phoneLabel = new JLabel("Phone:");
+
+        JTextField nameField = new JTextField();
+        JTextField ageField = new JTextField();
+        JTextField emailField = new JTextField();
+        JTextField addressField = new JTextField();
+        JTextField phoneField = new JTextField();
+
+        dialog.add(createRow(nameField, nameLabel));
+        dialog.add(createRow(ageField, ageLabel));
+        dialog.add(createRow(emailField, emailLabel));
+        dialog.add(createRow(addressField, addressLabel));
+        dialog.add(createRow(phoneField, phoneLabel));
+
+        JButton addButton = new JButton("Add");
+
+        addButton.addActionListener(e -> {
+            String name = nameField.getText();
+            String email = emailField.getText();
+            int age = Integer.parseInt(ageField.getText());
+            String address = addressField.getText();
+            String phone = phoneField.getText();
+            if (name.isEmpty() || age <= 0 || email.isEmpty() || address.isEmpty() || phone.isEmpty()) {
+                JOptionPane.showMessageDialog(dialog, "All fields must be filled!", "Error", JOptionPane.ERROR_MESSAGE);
+            }
+            else {
+                Client newClient = new Client(name, age, email, address, phone);
+                ClientBLL.addClient(newClient);
+                JOptionPane.showMessageDialog(dialog, "Client added successfully!");
+                dialog.dispose();
+                displayClientsTable();
+            }
+        });
+
+        dialog.add(new JPanel());
+        dialog.add(addButton);
+        dialog.setVisible(true);
+    }
+
+    public void displayAddProductDialog() {
+        JDialog dialog = new JDialog(this, "Add new product", true);
+        dialog.setSize(400, 300);
+        dialog.setLayout(new GridLayout(6, 1));
+        dialog.setLocationRelativeTo(this);
+
+        JLabel nameLabel = new JLabel("Name:");
+        JLabel priceLabel = new JLabel("Price:");
+        JLabel stockLabel = new JLabel("Stock:");
+
+        JTextField nameField = new JTextField();
+        JTextField priceField = new JTextField();
+        JTextField stockField = new JTextField();
+
+        dialog.add(createRow(nameField, nameLabel));
+        dialog.add(createRow(priceField, priceLabel));
+        dialog.add(createRow(stockField, stockLabel));
+
+        JButton addButton = new JButton("Add");
+
+        addButton.addActionListener(e -> {
+            String name = nameField.getText();
+            float price = Float.parseFloat(priceField.getText());
+            int stock = Integer.parseInt(stockField.getText());
+            if (name.isEmpty() || price <= 0 || stock < 0 ) {
+                JOptionPane.showMessageDialog(dialog, "All fields must be filled!", "Error", JOptionPane.ERROR_MESSAGE);
+            }
+            else {
+                Product newProduct = new Product(name, price, stock);
+                ProductBLL.addProduct(newProduct);
+                JOptionPane.showMessageDialog(dialog, "Product added successfully!");
+                dialog.dispose();
+                displayProductsTable();
+            }
+        });
+
+        dialog.add(new JPanel());
+        dialog.add(addButton);
+        dialog.setVisible(true);
+    }
+
 
     public void clearContentPane() {
         contentPane.removeAll();
