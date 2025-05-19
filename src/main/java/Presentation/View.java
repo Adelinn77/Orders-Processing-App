@@ -6,7 +6,9 @@ import BusinessLogic.OrderBLL;
 import DataAccess.ClientDAO;
 import DataAccess.ConnectionFactory;
 import Model.Client;
+import Model.Orderr;
 import Model.Product;
+import com.mysql.cj.x.protobuf.MysqlxCrud;
 import com.mysql.cj.xdevapi.Column;
 
 import javax.swing.*;
@@ -14,11 +16,15 @@ import javax.swing.table.DefaultTableCellRenderer;
 import javax.swing.table.JTableHeader;
 import javax.swing.table.TableColumn;
 import java.awt.*;
+import java.awt.event.MouseAdapter;
+import java.awt.event.MouseEvent;
+import java.util.*;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 import java.sql.Connection;
 import java.util.ArrayList;
 import java.util.Enumeration;
+import java.util.List;
 
 public class View extends JFrame {
     private JPanel contentPane;
@@ -70,20 +76,14 @@ public class View extends JFrame {
     public void setActionListeners() {
         clientsButton.addActionListener(e -> {
             displayClientsTable();
-            contentPane.revalidate();
-            contentPane.repaint();
         });
 
         productsButton.addActionListener(e -> {
             displayProductsTable();
-            contentPane.revalidate();
-            contentPane.repaint();
         });
 
         ordersButton.addActionListener(e -> {
             displayOrdersTable();
-            contentPane.revalidate();
-            contentPane.repaint();
         });
 
         addClient.addActionListener(e -> {
@@ -92,6 +92,10 @@ public class View extends JFrame {
 
         addProduct.addActionListener(e -> {
             displayAddProductDialog();
+        });
+
+        createOrder.addActionListener(e -> {
+            displayCreateOrderDialog();
         });
     }
 
@@ -120,26 +124,98 @@ public class View extends JFrame {
     }
 
     public void displayClientsTable() {
+        JPopupMenu popupMenu = new JPopupMenu();
+        JMenuItem editItem = new JMenuItem("Edit");
+        JMenuItem deleteItem = new JMenuItem("Delete");
+        popupMenu.add(editItem);
+        popupMenu.add(deleteItem);
+
+        clientsPanel.removeAll();
         JTable clientsTable = ClientBLL.getClientsTable();
+        clientsTable.setComponentPopupMenu(popupMenu);
+        clientsTable.addMouseListener(new MouseAdapter() {
+            @Override
+            public void mousePressed(MouseEvent e) {
+                int row = clientsTable.rowAtPoint(e.getPoint());
+                clientsTable.setRowSelectionInterval(row, row);
+            }
+        });
+        deleteItem.addActionListener(e -> {
+            int selectedRow = clientsTable.getSelectedRow();
+            if (selectedRow >= 0) {
+                int clientId = (int) clientsTable.getValueAt(selectedRow, 0);
+
+                int confirm = JOptionPane.showConfirmDialog(clientsTable, "Are you sure you want to delete this client?", "Confirm Delete", JOptionPane.YES_NO_OPTION);
+                if (confirm == JOptionPane.YES_OPTION) {
+                    Client client = ClientBLL.findClient(clientId);
+                    ClientBLL.deleteClient(client);
+                    displayClientsTable();
+                }
+            }
+        });
+
+//        editItem.addActionListener(e -> {
+//            int selectedRow = table.getSelectedRow();
+//            if (selectedRow >= 0) {
+//                Product selectedProduct = ((ReflectionTableModel<Product>) table.getModel()).getObjectAt(selectedRow);
+//                //showEditProductDialog(selectedProduct);  // implement this if you want
+//            }
+//        });
         customizeTable(clientsTable);
         JScrollPane scrollPane = new JScrollPane(clientsTable);
         clientsPanel.add(addClient, BorderLayout.NORTH);
         clientsPanel.add(scrollPane, BorderLayout.CENTER);
         clearContentPane();
         contentPane.add(clientsPanel, BorderLayout.CENTER);
+        contentPane.revalidate();
+        contentPane.repaint();
     }
 
     public void displayProductsTable() {
+        JPopupMenu popupMenu = new JPopupMenu();
+        JMenuItem editItem = new JMenuItem("Edit");
+        JMenuItem deleteItem = new JMenuItem("Delete");
+        popupMenu.add(editItem);
+        popupMenu.add(deleteItem);
+
+        productsPanel.removeAll();
         JTable productsTable = ProductBLL.getProductsTable();
+        productsTable.setComponentPopupMenu(popupMenu);
+
+        productsTable.addMouseListener(new MouseAdapter() {
+            @Override
+            public void mousePressed(MouseEvent e) {
+                int row = productsTable.rowAtPoint(e.getPoint());
+                productsTable.setRowSelectionInterval(row, row);
+            }
+        });
+        deleteItem.addActionListener(e -> {
+            int selectedRow = productsTable.getSelectedRow();
+            if (selectedRow >= 0) {
+                int productId = (int) productsTable.getValueAt(selectedRow, 0);
+
+                int confirm = JOptionPane.showConfirmDialog(productsTable, "Are you sure you want to delete this product?", "Confirm Delete", JOptionPane.YES_NO_OPTION);
+                if (confirm == JOptionPane.YES_OPTION) {
+                    Product product = ProductBLL.findProduct(productId);
+                    ProductBLL.deleteProduct(product);
+                    displayProductsTable();
+                }
+            }
+        });
+
         customizeTable(productsTable);
         JScrollPane scrollPane = new JScrollPane(productsTable);
         productsPanel.add(addProduct, BorderLayout.NORTH);
         productsPanel.add(scrollPane, BorderLayout.CENTER);
         clearContentPane();
         contentPane.add(productsPanel, BorderLayout.CENTER);
+        contentPane.revalidate();
+        contentPane.repaint();
     }
 
     public void displayOrdersTable() {
+
+        ordersPanel.removeAll();
         JTable ordersTable = OrderBLL.getOrdersTable();
         customizeTable(ordersTable);
         JScrollPane scrollPane = new JScrollPane(ordersTable);
@@ -147,6 +223,8 @@ public class View extends JFrame {
         ordersPanel.add(scrollPane, BorderLayout.CENTER);
         clearContentPane();
         contentPane.add(ordersPanel, BorderLayout.CENTER);
+        contentPane.revalidate();
+        contentPane.repaint();
     }
 
     public void displayAddClientDialog() {
@@ -239,6 +317,70 @@ public class View extends JFrame {
         dialog.setVisible(true);
     }
 
+    public void displayCreateOrderDialog() {
+        JDialog dialog = new JDialog(this, "Create order", true);
+        dialog.setSize(400, 300);
+        dialog.setLayout(new GridLayout(6, 1));
+        dialog.setLocationRelativeTo(this);
+
+        JLabel clientLabel = new JLabel("Select client:");
+        JLabel productLabel = new JLabel("Select product:");
+        JLabel quantityLabel = new JLabel("Quantity:");
+
+        List<Product> products = ProductBLL.findAllProducts();
+        List<Client> clients = ClientBLL.findAllClients();
+
+        JComboBox<Client> clientComboBox = new JComboBox<>(clients.toArray(new Client[0]));
+        JComboBox<Product> productComboBox = new JComboBox<>(products.toArray(new Product[0]));
+        JTextField quantityField = new JTextField();
+
+        productComboBox.setRenderer((list, value, index, isSelected, cellHasFocus) -> new JLabel(value != null ? value.getName() : ""));
+        clientComboBox.setRenderer((list, value, index, isSelected, cellHasFocus) -> new JLabel(value != null ? value.getName() : ""));
+
+        dialog.add(createRow(productComboBox, productLabel));
+        dialog.add(createRow(clientComboBox, clientLabel));
+        dialog.add(createRow(quantityField, quantityLabel));
+
+        JButton addButton = new JButton("Create");
+
+        addButton.addActionListener(e -> {
+            Product selectedProduct = (Product) productComboBox.getSelectedItem();
+            Client selectedClient = (Client) clientComboBox.getSelectedItem();
+
+            try {
+                int quantity = Integer.parseInt(quantityField.getText());
+                if(quantity <= 0){
+                    throw new NumberFormatException();
+                }
+                else if(selectedProduct == null){
+                    JOptionPane.showMessageDialog(dialog, "Select product first!", "Error", JOptionPane.ERROR_MESSAGE);
+                }
+                else if(selectedClient == null){
+                    JOptionPane.showMessageDialog(dialog, "Select client first!", "Error", JOptionPane.ERROR_MESSAGE);
+                }
+                else if(quantity > selectedProduct.getStock()){
+                    JOptionPane.showMessageDialog(dialog, "Quantity exceeds stock!", "Error", JOptionPane.ERROR_MESSAGE);
+                }
+                else{
+                    JOptionPane.showMessageDialog(dialog, "Order created successfully!");
+                    Orderr order = new Orderr(selectedClient.getId(), selectedProduct.getId(), quantity);
+                    OrderBLL.addOrder(order);
+                    selectedProduct.setStock(selectedProduct.getStock() - quantity);
+                    ProductBLL.updateProdcuct(selectedProduct);
+                    dialog.dispose();
+                    displayOrdersTable();
+                }
+            } catch (NumberFormatException ex) {
+                JOptionPane.showMessageDialog(dialog, "Quantity must be a positive integer!", "Error", JOptionPane.ERROR_MESSAGE);
+            }
+        });
+
+        dialog.add(new JPanel());
+        dialog.add(addButton);
+        dialog.setVisible(true);
+    }
+
+
 
     public void clearContentPane() {
         contentPane.removeAll();
@@ -275,10 +417,10 @@ public class View extends JFrame {
 
     }
 
-    public JPanel createRow(JTextField textField, JLabel label){
+    public JPanel createRow(JComponent inputField, JLabel label){
         JPanel row = new JPanel(new GridLayout(1, 2));
         row.add(label);
-        row.add(textField);
+        row.add(inputField);
         row.setBackground(new Color(167, 207, 255));
         row.setOpaque(false);
 

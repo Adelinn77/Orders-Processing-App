@@ -20,4 +20,16 @@ public class ClientBLL {
     public static void addClient(Client client) {
         clientDAO.insert(client);
     }
+
+    public static ArrayList<Client> findAllClients() {
+        return clientDAO.findAll();
+    }
+
+    public static void deleteClient(Client client) {
+        clientDAO.delete(client);
+    }
+
+    public static Client findClient(int clientID) {
+        return clientDAO.findById(clientID);
+    }
 }

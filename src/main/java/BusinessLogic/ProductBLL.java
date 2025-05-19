@@ -20,4 +20,20 @@ public class ProductBLL {
     public static void addProduct(Product product) {
         productDAO.insert(product);
     }
+
+    public static ArrayList<Product> findAllProducts() {
+        return productDAO.findAll();
+    }
+
+    public static void updateProdcuct(Product product) {
+        productDAO.update(product);
+    }
+
+    public static void deleteProduct(Product product) {
+        productDAO.delete(product);
+    }
+
+    public static Product findProduct(int productId) {
+        return productDAO.findById(productId);
+    }
 }

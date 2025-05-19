@@ -10,6 +10,15 @@ public class Orderr {
     private int productID;
     private int clientID;
 
+
+    public Orderr() {}
+    public Orderr(int clientID, int productID, int quantity) {
+        this.clientID = clientID;
+        this.productID = productID;
+        this.quantity = quantity;
+        this.date = new Date();
+    }
+
     public int getClientID() {
         return clientID;
     }
