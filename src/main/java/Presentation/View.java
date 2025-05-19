@@ -3,13 +3,9 @@ package Presentation;
 import BusinessLogic.ClientBLL;
 import BusinessLogic.ProductBLL;
 import BusinessLogic.OrderBLL;
-import DataAccess.ClientDAO;
-import DataAccess.ConnectionFactory;
 import Model.Client;
 import Model.Orderr;
 import Model.Product;
-import com.mysql.cj.x.protobuf.MysqlxCrud;
-import com.mysql.cj.xdevapi.Column;
 
 import javax.swing.*;
 import javax.swing.table.DefaultTableCellRenderer;
@@ -18,11 +14,6 @@ import javax.swing.table.TableColumn;
 import java.awt.*;
 import java.awt.event.MouseAdapter;
 import java.awt.event.MouseEvent;
-import java.util.*;
-import java.awt.event.ActionEvent;
-import java.awt.event.ActionListener;
-import java.sql.Connection;
-import java.util.ArrayList;
 import java.util.Enumeration;
 import java.util.List;
 
@@ -154,13 +145,14 @@ public class View extends JFrame {
             }
         });
 
-//        editItem.addActionListener(e -> {
-//            int selectedRow = table.getSelectedRow();
-//            if (selectedRow >= 0) {
-//                Product selectedProduct = ((ReflectionTableModel<Product>) table.getModel()).getObjectAt(selectedRow);
-//                //showEditProductDialog(selectedProduct);  // implement this if you want
-//            }
-//        });
+        editItem.addActionListener(e -> {
+            int selectedRow = clientsTable.getSelectedRow();
+            if (selectedRow >= 0) {
+                int clientId = (int) clientsTable.getValueAt(selectedRow, 0);
+                Client client = ClientBLL.findClient(clientId);
+                showEditClientDialog(client);
+            }
+        });
         customizeTable(clientsTable);
         JScrollPane scrollPane = new JScrollPane(clientsTable);
         clientsPanel.add(addClient, BorderLayout.NORTH);
@@ -202,6 +194,14 @@ public class View extends JFrame {
                 }
             }
         });
+        editItem.addActionListener(e -> {
+            int selectedRow = productsTable.getSelectedRow();
+            if (selectedRow >= 0) {
+                int productId = (int) productsTable.getValueAt(selectedRow, 0);
+                Product product = ProductBLL.findProduct(productId);
+                showEditProductDialog(product);
+            }
+        });
 
         customizeTable(productsTable);
         JScrollPane scrollPane = new JScrollPane(productsTable);
@@ -211,6 +211,114 @@ public class View extends JFrame {
         contentPane.add(productsPanel, BorderLayout.CENTER);
         contentPane.revalidate();
         contentPane.repaint();
+    }
+
+    private void showEditProductDialog(Product product) {
+        JDialog dialog = new JDialog(this, "Edit Product", true);
+        dialog.setSize(300, 250);
+        dialog.setLayout(new GridLayout(4, 2));
+        dialog.setLocationRelativeTo(this);
+
+        JLabel nameLabel = new JLabel("Name:");
+        JLabel priceLabel = new JLabel("Price:");
+        JLabel stockLabel = new JLabel("Stock:");
+
+        JTextField nameField = new JTextField(product.getName());
+        JTextField priceField = new JTextField(String.valueOf(product.getPrice()));
+        JTextField stockField = new JTextField(String.valueOf(product.getStock()));
+
+        JButton saveButton = new JButton("Save");
+
+        saveButton.addActionListener(e -> {
+            try {
+                String name = nameField.getText();
+                int stock = Integer.parseInt(stockField.getText());
+                float price = Float.parseFloat(priceField.getText());
+
+                if (name.isBlank() || stock < 0 || price < 0) {
+                    throw new IllegalArgumentException("Invalid values");
+                }
+
+                product.setName(name);
+                product.setStock(stock);
+                product.setPrice(price);
+
+                ProductBLL.updateProduct(product);
+
+                JOptionPane.showMessageDialog(dialog, "Product updated!");
+                dialog.dispose();
+                displayProductsTable();
+            } catch (Exception ex) {
+                JOptionPane.showMessageDialog(dialog, "Invalid input!", "Error", JOptionPane.ERROR_MESSAGE);
+            }
+        });
+
+        dialog.add(nameLabel); dialog.add(nameField);
+        dialog.add(stockLabel); dialog.add(stockField);
+        dialog.add(priceLabel); dialog.add(priceField);
+        dialog.add(new JLabel());
+        dialog.add(saveButton);
+
+        dialog.setVisible(true);
+    }
+
+    private void showEditClientDialog(Client client) {
+        JDialog dialog = new JDialog(this, "Edit Client", true);
+        dialog.setSize(300, 250);
+        dialog.setLayout(new GridLayout(6, 2));
+        dialog.setLocationRelativeTo(this);
+
+        JLabel nameLabel = new JLabel("Name:");
+        JLabel ageLabel = new JLabel("Age:");
+        JLabel emailLabel = new JLabel("Email:");
+        JLabel addressLabel = new JLabel("Address:");
+        JLabel phoneLabel = new JLabel("Phone:");
+
+        JTextField nameField = new JTextField(client.getName());
+        JTextField ageField = new JTextField(String.valueOf(client.getAge()));
+        JTextField emailField = new JTextField(client.getEmail());
+        JTextField addressField = new JTextField(client.getAddress());
+        JTextField phoneField = new JTextField(client.getPhone());
+
+        JButton saveButton = new JButton("Save");
+
+        saveButton.addActionListener(e -> {
+            try {
+                String name = nameField.getText();
+                int age = Integer.parseInt(ageField.getText());
+                String email = emailField.getText();
+                String address = addressField.getText();
+                String phone = phoneField.getText();
+
+                if (name.isBlank() || age <= 0 || email.isEmpty() || address.isEmpty() || phone.isEmpty()) {
+                    throw new IllegalArgumentException("Invalid values");
+                }
+
+                client.setName(name);
+                client.setAge(age);
+                client.setEmail(email);
+                client.setAddress(address);
+                client.setPhone(phone);
+
+                ClientBLL.updateClient(client);
+
+                JOptionPane.showMessageDialog(dialog, "Client updated!");
+                dialog.dispose();
+                displayClientsTable();
+            } catch (Exception ex) {
+                JOptionPane.showMessageDialog(dialog, "Invalid input!", "Error", JOptionPane.ERROR_MESSAGE);
+            }
+        });
+
+        dialog.add(nameLabel); dialog.add(nameField);
+        dialog.add(ageLabel); dialog.add(ageField);
+        dialog.add(emailLabel); dialog.add(emailField);
+        dialog.add(addressLabel); dialog.add(addressField);
+        dialog.add(phoneLabel); dialog.add(phoneField);
+
+        dialog.add(new JLabel());
+        dialog.add(saveButton);
+        dialog.setVisible(true);
     }
 
     public void displayOrdersTable() {
@@ -366,7 +474,7 @@ public class View extends JFrame {
                     Orderr order = new Orderr(selectedClient.getId(), selectedProduct.getId(), quantity);
                     OrderBLL.addOrder(order);
                     selectedProduct.setStock(selectedProduct.getStock() - quantity);
-                    ProductBLL.updateProdcuct(selectedProduct);
+                    ProductBLL.updateProduct(selectedProduct);
                     dialog.dispose();
                     displayOrdersTable();
                 }

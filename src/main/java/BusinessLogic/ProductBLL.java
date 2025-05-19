@@ -1,8 +1,6 @@
 package BusinessLogic;
 
-import DataAccess.ClientDAO;
 import DataAccess.ProductDAO;
-import Model.Client;
 import Model.Product;
 
 import javax.swing.*;
@@ -25,7 +23,7 @@ public class ProductBLL {
         return productDAO.findAll();
     }
 
-    public static void updateProdcuct(Product product) {
+    public static void updateProduct(Product product) {
         productDAO.update(product);
     }
 

@@ -3,6 +3,7 @@ package BusinessLogic;
 import DataAccess.AbstractDAO;
 import DataAccess.ClientDAO;
 import Model.Client;
+import Model.Product;
 
 import javax.swing.*;
 import java.util.ArrayList;
@@ -23,6 +24,10 @@ public class ClientBLL {
 
     public static ArrayList<Client> findAllClients() {
         return clientDAO.findAll();
+    }
+
+    public static void updateClient(Client client) {
+        clientDAO.update(client);
     }
 
     public static void deleteClient(Client client) {

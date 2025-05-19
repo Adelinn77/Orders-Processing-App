@@ -1,6 +1,7 @@
 package DataAccess;
 
 import javax.swing.*;
+import javax.swing.table.DefaultTableModel;
 import java.beans.IntrospectionException;
 import java.beans.PropertyDescriptor;
 import java.lang.reflect.Field;
@@ -256,7 +257,14 @@ public class AbstractDAO<T> {
                 }
             }
         }
-        return new JTable(data, columnNames);
+        DefaultTableModel model = new DefaultTableModel(data, columnNames) {
+            @Override
+            public boolean isCellEditable(int row, int column) {
+                return false; // all cells are read-only
+            }
+        };
+
+        return new JTable(model);
     }
 
 
