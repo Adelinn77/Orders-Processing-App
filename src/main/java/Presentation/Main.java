@@ -1,14 +1,11 @@
 package Presentation;
 
 import DataAccess.ConnectionFactory;
-import Model.Client;
 
 import java.sql.Connection;
-import java.sql.PreparedStatement;
-import java.sql.ResultSet;
 import java.sql.SQLException;
 
-public class TestClass {
+public class Main {
 
     public static void main(String[] args) throws SQLException {
         Connection conn = ConnectionFactory.getConnection();

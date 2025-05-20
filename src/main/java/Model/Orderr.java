@@ -3,6 +3,14 @@ package Model;
 import java.time.LocalDate;
 import java.util.Date;
 
+/**
+ * Represents an order placed by a client for a specific product.
+ * <p>
+ * Each order includes the ID of the client and product, the quantity ordered,
+ * the date when the order was placed, and an auto-generated order ID.
+ * </p>
+ */
+
 public class Orderr {
     private int id;
     private Date date;

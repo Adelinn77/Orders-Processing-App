@@ -1,8 +1,11 @@
 package Presentation;
 
+import BusinessLogic.BillBLL;
 import BusinessLogic.ClientBLL;
 import BusinessLogic.ProductBLL;
 import BusinessLogic.OrderBLL;
+import DataAccess.BillDao;
+import Model.Bill;
 import Model.Client;
 import Model.Orderr;
 import Model.Product;
@@ -14,8 +17,29 @@ import javax.swing.table.TableColumn;
 import java.awt.*;
 import java.awt.event.MouseAdapter;
 import java.awt.event.MouseEvent;
+import java.util.Date;
 import java.util.Enumeration;
 import java.util.List;
+
+/**
+ * The main graphical user interface (GUI) for the Orders Management application.
+ * <p>
+ * This class extends {@link JFrame} and provides the main window where users
+ * can manage clients, products, orders, and view generated bills.
+ * It includes buttons for navigation and uses different panels to display
+ * content dynamically based on user interactions.
+ * </p>
+ *
+ * <ul>
+ *   <li>Clients: Add, edit, delete, and list clients.</li>
+ *   <li>Products: Add, edit, delete, and list products.</li>
+ *   <li>Orders: Create new orders and update stock accordingly.</li>
+ *   <li>Bills: Display all bills generated from orders.</li>
+ * </ul>
+ *
+ * This GUI uses a custom {@code BackgroundPanel} and custom table styling to provide a polished look.
+ * It integrates with the business logic layer (BLL) to interact with the underlying data.
+ */
 
 public class View extends JFrame {
     private JPanel contentPane;
@@ -28,6 +52,7 @@ public class View extends JFrame {
     private JButton productsButton = new JButton("PRODUCTS");
     private JButton ordersButton = new JButton("ORDERS");
     private JButton createOrder = new JButton("Create Order");
+    private JButton billsButton = new JButton("View Bills");
     private JButton addClient = new JButton("Add Client");
     private JButton addProduct = new JButton("Add Product");
 
@@ -51,6 +76,7 @@ public class View extends JFrame {
         customizeAddButtons(createOrder);
         customizeAddButtons(addClient);
         customizeAddButtons(addProduct);
+        customizeAddButtons(billsButton);
 
         this.setActionListeners();
 
@@ -87,6 +113,10 @@ public class View extends JFrame {
 
         createOrder.addActionListener(e -> {
             displayCreateOrderDialog();
+        });
+
+        billsButton.addActionListener(e -> {
+           displayBillsFromLog();
         });
     }
 
@@ -213,6 +243,20 @@ public class View extends JFrame {
         contentPane.repaint();
     }
 
+    public void displayBillsFromLog() {
+        JTable billsTable = BillBLL.getBillsTable();
+        JScrollPane scrollPane = new JScrollPane(billsTable);
+
+        JDialog dialog = new JDialog(this, "All Bills (Log)", true);
+        dialog.setSize(800, 400);
+        dialog.setLocationRelativeTo(this);
+        dialog.setLayout(new BorderLayout());
+
+        dialog.add(scrollPane, BorderLayout.CENTER);
+        dialog.setVisible(true);
+    }
+
+
     private void showEditProductDialog(Product product) {
         JDialog dialog = new JDialog(this, "Edit Product", true);
         dialog.setSize(300, 250);
@@ -328,6 +372,7 @@ public class View extends JFrame {
         customizeTable(ordersTable);
         JScrollPane scrollPane = new JScrollPane(ordersTable);
         ordersPanel.add(createOrder, BorderLayout.NORTH);
+        ordersPanel.add(billsButton, BorderLayout.SOUTH);
         ordersPanel.add(scrollPane, BorderLayout.CENTER);
         clearContentPane();
         contentPane.add(ordersPanel, BorderLayout.CENTER);
@@ -369,6 +414,9 @@ public class View extends JFrame {
             String phone = phoneField.getText();
             if (name.isEmpty() || age <= 0 || email.isEmpty() || address.isEmpty() || phone.isEmpty()) {
                 JOptionPane.showMessageDialog(dialog, "All fields must be filled!", "Error", JOptionPane.ERROR_MESSAGE);
+            }
+            else if(phone.length() != 10 || phone.contains(" ")) {
+                JOptionPane.showMessageDialog(dialog, "Phone number must have 10 digits!", "Error", JOptionPane.ERROR_MESSAGE);
             }
             else {
                 Client newClient = new Client(name, age, email, address, phone);
@@ -438,8 +486,13 @@ public class View extends JFrame {
         List<Product> products = ProductBLL.findAllProducts();
         List<Client> clients = ClientBLL.findAllClients();
 
-        JComboBox<Client> clientComboBox = new JComboBox<>(clients.toArray(new Client[0]));
-        JComboBox<Product> productComboBox = new JComboBox<>(products.toArray(new Product[0]));
+//        JComboBox<Client> clientComboBox = new JComboBox<>(clients.toArray(new Client[0]));
+//        JComboBox<Product> productComboBox = new JComboBox<>(products.toArray(new Product[0]));
+        JComboBox<Client> clientComboBox = new JComboBox<>(
+                clients.stream().toArray(Client[]::new));
+
+        JComboBox<Product> productComboBox = new JComboBox<>(
+                products.stream().toArray(Product[]::new));
         JTextField quantityField = new JTextField();
 
         productComboBox.setRenderer((list, value, index, isSelected, cellHasFocus) -> new JLabel(value != null ? value.getName() : ""));
@@ -476,6 +529,13 @@ public class View extends JFrame {
                     selectedProduct.setStock(selectedProduct.getStock() - quantity);
                     ProductBLL.updateProduct(selectedProduct);
                     dialog.dispose();
+                    Bill bill = new Bill(
+                            selectedClient.getName(),
+                            selectedProduct.getName(),
+                            order.getQuantity(),
+                            selectedProduct.getPrice() * order.getQuantity(),
+                            new Date());
+                    BillBLL.addBill(bill);
                     displayOrdersTable();
                 }
             } catch (NumberFormatException ex) {
