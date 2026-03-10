@@ -1,93 +1,72 @@
-# PT2025_30223_Vancea_Tudor-Adelin_Assignment_3
+🛒 Orders Processing Application
+Welcome to the Orders Processing Application repository! This is a robust, desktop-based management system designed to streamline the handling of clients, product inventories, and customer orders. It utilizes a relational database architecture to ensure data integrity and seamless business operations.
 
+📖 Project Overview
+This application serves as a complete backend and frontend solution for a basic e-commerce or retail management setup. It provides an intuitive graphical interface for administrators to execute CRUD (Create, Read, Update, Delete) operations on both clients and products.
 
+Furthermore, the system includes intelligent order processing logic: when a customer places an order, the application verifies product availability, automatically updates stock levels in the database, and generates a bill—preventing over-ordering and keeping inventory synchronized.
 
-## Getting started
+✨ Key Features
+👥 Client Management:
 
-To make it easy for you to get started with GitLab, here's a list of recommended next steps.
+Add new clients, update existing information, view the complete client roster, or delete records from the database.
 
-Already a pro? Just edit this README.md and make it your own. Want to make it easy? [Use the template at the bottom](#editing-this-readme)!
+📦 Product & Inventory Management:
 
-## Add your files
+Manage product catalogs including names, prices, and available stock quantities.
 
-- [ ] [Create](https://docs.gitlab.com/ee/user/project/repository/web_editor.html#create-a-file) or [upload](https://docs.gitlab.com/ee/user/project/repository/web_editor.html#upload-a-file) files
-- [ ] [Add files using the command line](https://docs.gitlab.com/topics/git/add_files/#add-files-to-a-git-repository) or push an existing Git repository with the following command:
+🧾 Order Processing & Validation:
 
-```
-cd existing_repo
-git remote add origin https://gitlab.com/pt2025_30223_vancea_tudor-adelin/pt2025_30223_vancea_tudor-adelin_assignment_3.git
-git branch -M main
-git push -uf origin main
-```
+Create new orders by selecting a client and a product.
 
-## Integrate with your tools
+Smart Stock Check: The system automatically verifies if the requested quantity is available in stock.
 
-- [ ] [Set up project integrations](https://gitlab.com/pt2025_30223_vancea_tudor-adelin/pt2025_30223_vancea_tudor-adelin_assignment_3/-/settings/integrations)
+Auto-Update: If the order is valid, the product's stock is automatically decremented in the database.
 
-## Collaborate with your team
+🗄️ Relational Database Integration:
 
-- [ ] [Invite team members and collaborators](https://docs.gitlab.com/ee/user/project/members/)
-- [ ] [Create a new merge request](https://docs.gitlab.com/ee/user/project/merge_requests/creating_merge_requests.html)
-- [ ] [Automatically close issues from merge requests](https://docs.gitlab.com/ee/user/project/issues/managing_issues.html#closing-issues-automatically)
-- [ ] [Enable merge request approvals](https://docs.gitlab.com/ee/user/project/merge_requests/approvals/)
-- [ ] [Set auto-merge](https://docs.gitlab.com/user/project/merge_requests/auto_merge/)
+Fully integrated with a MySQL database using JDBC, ensuring all data is persistently and securely stored.
 
-## Test and Deploy
+📸 Screenshots
+Here is a look at the application menu:
+![app menu](screenshots/AppMenu.png)
+💻 Tech Stack & Architecture
+Language: Java (Core SE)
 
-Use the built-in continuous integration in GitLab.
+User Interface: Java Swing / AWT
 
-- [ ] [Get started with GitLab CI/CD](https://docs.gitlab.com/ee/ci/quick_start/)
-- [ ] [Analyze your code for known vulnerabilities with Static Application Security Testing (SAST)](https://docs.gitlab.com/ee/user/application_security/sast/)
-- [ ] [Deploy to Kubernetes, Amazon EC2, or Amazon ECS using Auto Deploy](https://docs.gitlab.com/ee/topics/autodevops/requirements.html)
-- [ ] [Use pull-based deployments for improved Kubernetes management](https://docs.gitlab.com/ee/user/clusters/agent/)
-- [ ] [Set up protected environments](https://docs.gitlab.com/ee/ci/environments/protected_environments.html)
+Database: MySQL
 
-***
+Connectivity: Java Database Connectivity (JDBC)
 
-# Editing this README
+Architecture: The project follows a structured Data Access Object (DAO) or MVC pattern, separating the database logic from the user interface.
 
-When you're ready to make this README your own, just edit this file and use the handy template below (or feel free to structure it however you want - this is just a starting point!). Thanks to [makeareadme.com](https://www.makeareadme.com/) for this template.
+🚀 Getting Started
+Prerequisites
+Java Development Kit (JDK): Version 8 or higher.
 
-## Suggestions for a good README
+MySQL Server: Installed and running on your local machine.
 
-Every project is different, so consider which of these sections apply to yours. The sections used in the template are suggestions for most open source projects. Also keep in mind that while a README can be too long and detailed, too long is better than too short. If you think your README is too long, consider utilizing another form of documentation rather than cutting out information.
+JDBC Driver: MySQL Connector/J (usually added via Maven or as an external .jar).
 
-## Name
-Choose a self-explaining name for your project.
+Database Setup
+To run this application, you must first set up the local database:
 
-## Description
-Let people know what your project can do specifically. Provide context and add a link to any reference visitors might be unfamiliar with. A list of Features or a Background subsection can also be added here. If there are alternatives to your project, this is a good place to list differentiating factors.
+Open your MySQL client (e.g., MySQL Workbench).
 
-## Badges
-On some READMEs, you may see small images that convey metadata, such as whether or not all the tests are passing for the project. You can use Shields to add some to your README. Many services also have instructions for adding a badge.
+Execute the provided .sql script (look for a database_setup.sql or similar file in the repository) to create the schema and necessary tables (Client, Product, Order).
 
-## Visuals
-Depending on what you are making, it can be a good idea to include screenshots or even a video (you'll frequently see GIFs rather than actual videos). Tools like ttygif can help, but check out Asciinema for a more sophisticated method.
+Update the database connection credentials (URL, Username, Password) in the project's source code (usually in a ConnectionFactory or DatabaseManager class) to match your local setup.
 
-## Installation
-Within a particular ecosystem, there may be a common way of installing things, such as using Yarn, NuGet, or Homebrew. However, consider the possibility that whoever is reading your README is a novice and would like more guidance. Listing specific steps helps remove ambiguity and gets people to using your project as quickly as possible. If it only runs in a specific context like a particular programming language version or operating system or has dependencies that have to be installed manually, also add a Requirements subsection.
+Running the Application
+git clone https://github.com/Adelinn77/Orders-Processing-App.git
 
-## Usage
-Use examples liberally, and show the expected output if you can. It's helpful to have inline the smallest example of usage that you can demonstrate, while providing links to more sophisticated examples if they are too long to reasonably include in the README.
+Open the project in your preferred IDE (IntelliJ IDEA, Eclipse, etc.).
 
-## Support
-Tell people where they can go to for help. It can be any combination of an issue tracker, a chat room, an email address, etc.
+Ensure the JDBC driver is correctly linked to your project structure or pom.xml.
 
-## Roadmap
-If you have ideas for releases in the future, it is a good idea to list them in the README.
+Compile and run the main application class to launch the GUI!
 
-## Contributing
-State if you are open to contributions and what your requirements are for accepting them.
+Author: Adelinn77
 
-For people who want to make changes to your project, it's helpful to have some documentation on how to get started. Perhaps there is a script that they should run or some environment variables that they need to set. Make these steps explicit. These instructions could also be useful to your future self.
-
-You can also document commands to lint the code or run tests. These steps help to ensure high code quality and reduce the likelihood that the changes inadvertently break something. Having instructions for running tests is especially helpful if it requires external setup, such as starting a Selenium server for testing in a browser.
-
-## Authors and acknowledgment
-Show your appreciation to those who have contributed to the project.
-
-## License
-For open source projects, say how it is licensed.
-
-## Project status
-If you have run out of energy or time for your project, put a note at the top of the README saying that development has slowed down or stopped completely. Someone may choose to fork your project or volunteer to step in as a maintainer or owner, allowing your project to keep going. You can also make an explicit request for maintainers.
+A complete relational database and GUI integration project.
